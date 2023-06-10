@@ -47,11 +47,13 @@ def getFaceBox(net, frame, conf_threshold=0.7):
             y2 = int(detections[0, 0, i, 6] * frameHeight)
             bboxes.append([x1, y1, x2, y2])
             cv2.rectangle(frameOpencvDnn, (x1, y1), (x2, y2), (0, 255, 0), int(round(frameHeight/150)), 8)
+            
     return frameOpencvDnn, bboxes
 
 def age_gender_detector(frame):
     # Read frame
     frameFace, bboxes = getFaceBox(faceNet, frame)
+    centers=[]
     for bbox in bboxes:
         # print(bbox)
         face = frame[max(0, bbox[1]-padding):min(bbox[3]+padding, frame.shape[0]-1), max(0, bbox[0]-padding):min(bbox[2]+padding, frame.shape[1]-1)]
@@ -70,7 +72,13 @@ def age_gender_detector(frame):
         
         label = "{},{}".format(gender, age)
         cv2.putText(frameFace, label, (bbox[0], bbox[1]-10), cv2.FONT_HERSHEY_SIMPLEX, 0.8, (0, 255, 255), 2, cv2.LINE_AA)
-    
+
+        center_x = int((bbox[0] + bbox[2]) / 2)
+        center_y = int((bbox[1] + bbox[3]) / 2)
+        centers.append((center_x, center_y))
+        
+    for center in centers:
+        print("face coordinates: ({}, {})".format(center[0], center[1]))
     return frameFace
 
 class Detector:
